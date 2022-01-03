@@ -1,5 +1,5 @@
 from django.shortcuts import render, reverse
-
+from django.http import HttpResponse
 
 DATA = {
     'omlet': {
@@ -17,35 +17,48 @@ DATA = {
         'сыр, ломтик': 1,
         'помидор, ломтик': 1,
     },
-
+    # можете добавить свои рецепты ;)
 }
 
 
 def home_view(request):
-    template_name = 'calculator/home.html'
-    pages = {
-        'Главная страница': reverse('home'),
-        'Рецепт омлета': reverse('omlet'),
-        'Рецепт пасты': reverse('pasta'),
-        'Рецепт бутерброда': reverse('buter')
-    }
+    message = ""
+    for i in DATA.keys():
+        message += f"<a href= {reverse(i)}>{i}</a><br>"
+    return HttpResponse(f"{message}")
 
+
+def buter_view(request):
+    count = int(request.GET.get("servings", 1))
     context = {
-        'pages': pages
+      'recipe': {
+         'хлеб, ломтик': 1 * count,
+         'колбаса, ломтик': 1 * count,
+         'сыр, ломтик': 1 * count,
+         'помидор, ломтик': 1 * count,
+      }
     }
-    return render(request, template_name, context)
+    return render(request, 'calculator/index.html', context)
 
 
-def recipes(request):
-    servings = int(request.GET.get('servings', 1))
-    recipe = {}
-    for keys in DATA.keys():
-        if keys in request.path:
-            recipe = DATA.get(keys).copy()
-    template_name = 'calculator/index.html'
-    for key in recipe.keys():
-        recipe[key] = recipe.get(key) * servings
+def omlet_view(request):
+    count = int(request.GET.get("servings", 1))
     context = {
-        'recipe': recipe,
+        'recipe': {
+            'яйца, шт': 2 * count,
+            'молоко, л': 0.1 * count,
+            'соль, ч.л.': 0.5 * count
         }
-    return render(request, template_name, context)
+    }
+    return render(request, 'calculator/index.html', context)
+
+
+def pasta_view(request):
+    count = int(request.GET.get("servings", 1))
+    context = {
+        'recipe': {
+            'макароны, г': 0.3 * count,
+            'сыр, г': 0.05 * count
+        }
+    }
+    return render(request, 'calculator/index.html', context)
